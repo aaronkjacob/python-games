@@ -2,7 +2,7 @@ import pygame
 import time
 import random
 
-# pygame set-up
+# pygame setup
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()

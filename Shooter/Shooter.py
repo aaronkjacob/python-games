@@ -212,7 +212,7 @@ while running:
     screen.fill('black')
     background()
     
-    score = Text(str(player.score), 50, (WIDTH/2,60))
+    score = Text("score:"+str(player.score), 50, (WIDTH/2,60))
     score.draw()
 
     print(len(player_bullets))

@@ -21,7 +21,7 @@ PLAYER_VELOCITY = 5  # Player movement speed
 
 def get_background(name):
     # Load background image
-    image = pygame.image.load(join("assets", "backgrounds", name))
+    image = pygame.image.load(join("assets", "background", name))
     __, __, width, height = image.get_rect()
     tiles = []
 
@@ -39,7 +39,7 @@ def draw(screen,background, bg_image):
 def main(screen):
     clock = pygame.time.Clock() # Initialize the clock
 
-    background, bg_image = get_background("Blue.png")  # Load the background image
+    background, bg_image = get_background("blue.png")  # Load the background image
 
     running = True # Main game loop
     while running:

@@ -136,8 +136,8 @@ class Text():
     text_rect = text.get_rect(center=(self.coordinates))
     screen.blit(text, text_rect)
  
-paddleA = Paddle(10,screen.get_height()/2-90,10,180)
-paddleB = Paddle(screen.get_width()-20,screen.get_height()/2-90,10,180)
+paddleA = Paddle(10,screen.get_height()/2-90,10,150)
+paddleB = Paddle(screen.get_width()-20,screen.get_height()/2-90,10,150)
 
 ball = Ball(screen.get_width()/2, screen.get_height()/2,10,5)
 

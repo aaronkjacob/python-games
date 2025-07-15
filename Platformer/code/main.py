@@ -22,7 +22,7 @@ PLAYER_VELOCITY = 5  # Player movement speed
 def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites] # Flip sprites horizontally
 def load_spritesheet(dir1,dr2,width,height,direction=False):
-    path = join("Platformer", "assets", dir1, dr2)
+    path = join("assets", dir1, dr2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
 
     all_sprites = {}
@@ -44,7 +44,7 @@ def load_spritesheet(dir1,dr2,width,height,direction=False):
     return all_sprites
 
 def get_block(size):
-    path = join("Platformer", "assets", "Terrain",  "Terrain.png")
+    path = join("assets", "Terrain",  "Terrain.png")
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
     rect = pygame.Rect(96, 0, size, size)
@@ -188,7 +188,7 @@ class Fire(Object):
 
 def get_background(name):
     # Load background image
-    image = pygame.image.load(join("Platformer","assets", "Background", name))
+    image = pygame.image.load(join("assets", "Background", name))
     __, __, width, height = image.get_rect()
     tiles = []
 

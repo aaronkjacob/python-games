@@ -26,15 +26,26 @@ class Player(pygame.sprite.Sprite):
         self.x_vel = 0
         self.y_vel = 0
         self.mask = None
+        self.direction = 'left'
+        self.animation_count = 0
     def move(self, dx, dy):
         self.rect.x += dx
         self.rect.y += dy
     def move_left(self, vel):
         self.x_vel = -vel
-        if self.direction == 'left':
+        if self.direction != 'left':
             self.direction = 'left'
+            self.animation_count - 0
     def move_right(self, vel):
         self.x_vel = vel
+        if self.direction != 'right':
+            self.direction = 'right'
+            self.animation_count = 0
+    def loop(self,fps):
+        self.move(self.x_vel, self.y_vel)
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.COLOR, self.rect)
+
 
 def get_background(name):
     # Load background image
@@ -48,15 +59,28 @@ def get_background(name):
             tiles.append(pos)
     return tiles, image
 
-def draw(screen,background, bg_image):
+def draw(screen,background, bg_image, player):
     for tile in background:
         screen.blit(bg_image, tile)
     pygame.display.update()
+    player.draw(screen)  # Draw the player on the screen
+
+def handle_move(player):
+    keys = pygame.key.get_pressed()
+    player.x_vel = 0  # Reset horizontal velocity
+    if keys[pygame.K_LEFT]:
+        player.move_left(PLAYER_VELOCITY)
+    if keys[pygame.K_RIGHT]:
+        player.move_right(PLAYER_VELOCITY)
+
+    player.loop(FPS)  # Update player position
 
 def main(screen):
     clock = pygame.time.Clock() # Initialize the clock
 
     background, bg_image = get_background("Yellow.png")  # Load the background image
+
+    player = Player(100, 100, 50, 50)  # Create a player instance
 
     running = True # Main game loop
     while running:
@@ -67,12 +91,15 @@ def main(screen):
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
+        player.loop(FPS)  # Update player position
+        handle_move(player) # Handle player movement
         # Fill the screen with the background color
-        screen.fill(BG_COLOR)
-        draw(screen,background,bg_image)
+        draw(screen,background,bg_image, player)
+
+
 
         # Update the display
-        pygame.display.flip()
+        pygame.display.update()
         clock.tick(FPS)
 
 if __name__ == "__main__":

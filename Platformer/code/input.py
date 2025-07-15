@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-
+# Checks for user input and returns the corresponding action
 
 def handle_input():    
   keys = pygame.key.get_pressed()    

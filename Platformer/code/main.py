@@ -1,3 +1,4 @@
+#import necessary modules
 import pygame
 from pygame.locals import *
 from input import handle_input
@@ -10,6 +11,7 @@ WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer Game")
 
+# Running variable and clock
 clock = pygame.time.Clock()
 running = True
 

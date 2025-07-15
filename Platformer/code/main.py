@@ -19,6 +19,23 @@ FPS = 60  # Frames per second
 
 PLAYER_VELOCITY = 5  # Player movement speed
 
+class Player(pygame.sprite.Sprite):
+    COLOR = (255, 0, 0)  # Player color (red)
+    def __init__(self, x,y,width,height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.x_vel = 0
+        self.y_vel = 0
+        self.mask = None
+    def move(self, dx, dy):
+        self.rect.x += dx
+        self.rect.y += dy
+    def move_left(self, vel):
+        self.x_vel = -vel
+        if self.direction == 'left':
+            self.direction = 'left'
+    def move_right(self, vel):
+        self.x_vel = vel
+
 def get_background(name):
     # Load background image
     image = pygame.image.load(join("Platformer","assets", "Background", name))

@@ -67,6 +67,11 @@ class Player(pygame.sprite.Sprite):
         self.animation_count = 0
         self.fall_count = 0
         self.jump_count = 0
+        self.hit = False  # Flag to check if player is hit
+        self.hit_count = 0  # Counter for hit animation
+    def make_hit(self):
+        self.hit = True
+        self.hit_count = 0
     def jump(self):
         self.y_vel = -self.GRAVITY * 8  # Set vertical velocity for jumping
         self.animation_count = 0  # Reset animation count when jumping
@@ -88,8 +93,15 @@ class Player(pygame.sprite.Sprite):
             self.direction = 'right'
             self.animation_count = 0
     def loop(self,fps):
+
         self.y_vel += min(1, (self.fall_count / fps))  * self.GRAVITY  # Apply gravity
         self.move(self.x_vel, self.y_vel)
+
+        if self.hit: # If player is hit, apply hit animation
+            self.hit_count += 1
+        if self.hit_count >= fps * 2:
+            self.hit = False
+            self.hit_count = 0 # Reset hit count after hit animation
 
         self.fall_count += 1
         self.update_sprite()  # Update the sprite based on movement and direction
@@ -104,6 +116,8 @@ class Player(pygame.sprite.Sprite):
     
     def update_sprite(self):
         sprite_sheet = 'idle'
+        if self.hit:  # If player is hit, use hit animation
+            sprite_sheet = 'hit'
         if self.y_vel < 0:  # If jumping
             if self.jump_count == 1:
                 sprite_sheet = 'jump'
@@ -142,6 +156,36 @@ class Block(Object):
         self.image.blit(block, (0,0)) # Load the block image and draw it on the object surface
         self.mask = pygame.mask.from_surface(self.image)  # Create a mask from the block image for collision detection
 
+class Fire(Object):
+    ANIMATION_DELAY = 3
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "fire")
+        self.fire = load_spritesheet("Traps", "Fire", width, height)
+        self.image = self.fire["off"][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+        self.animation_name = "off"
+
+    def on(self):
+        self.animation_name = "on"
+
+    def off(self):
+        self.animation_name = "off"
+
+    def loop(self):
+        sprites = self.fire[self.animation_name]
+        sprite_index = (self.animation_count //
+                        self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
+
 def get_background(name):
     # Load background image
     image = pygame.image.load(join("Platformer","assets", "Background", name))
@@ -174,7 +218,7 @@ def handle_vertical_collision(player, objects,dy):
             elif dy < 0:  # Moving up
                 player.rect.top = obj.rect.bottom # Set player top to object bottom
                 player.hit_head()
-        collided_objects.append(obj)  # Add collided objects to the list
+            collided_objects.append(obj)  # Add collided objects to the list
     return collided_objects
 
 def collide(player, objects, dx):
@@ -203,7 +247,11 @@ def handle_move(player, objects):
     if keys[pygame.K_RIGHT] and not collide_right:  # If right key is pressed and no collision
         player.move_right(PLAYER_VELOCITY)
 
-    handle_vertical_collision(player, objects, player.y_vel)  # Handle vertical collisions
+    vertical_collide = handle_vertical_collision(player, objects, player.y_vel)  # Handle vertical collisions
+    to_check = [collide_left, collide_right, *vertical_collide]  # List of objects to check for collisions
+    for obj in to_check:
+        if obj and obj.name == "fire":
+            player.make_hit()  # If player collides with fire, set hit flag
 
 def main(screen):
     clock = pygame.time.Clock() # Initialize the clock
@@ -213,8 +261,10 @@ def main(screen):
     block_size = 96
 
     player = Player(100, 100, 50, 50)  # Create a player instance
+    fire = Fire(100, SCREEN_HEIGHT - block_size - 64, 16, 32) # Create a fire instance
+    fire.on()  # Turn on the fire
     floor = [Block(i*block_size, SCREEN_HEIGHT - block_size, block_size) for i in range(-SCREEN_WIDTH // block_size, SCREEN_WIDTH*2 // block_size)]  # Create a floor of blocks
-    objects = [*floor, Block(0,SCREEN_HEIGHT - block_size * 2, block_size), Block(block_size * 3, SCREEN_HEIGHT - block_size * 4, block_size)]  # Create some additional blocks
+    objects = [*floor, Block(0,SCREEN_HEIGHT - block_size * 2, block_size), Block(block_size * 3, SCREEN_HEIGHT - block_size * 4, block_size), fire]  # Create some additional blocks
 
     offset_x = 0
     scroll_area_width = 200  # Width of the scroll area
@@ -233,6 +283,7 @@ def main(screen):
                         player.jump()
 
         player.loop(FPS)  # Update player position
+        fire.loop()  # Update fire animation
         handle_move(player, objects) # Handle player movement
         # Fill the screen with the background color
         draw(screen,background,bg_image, player, objects, offset_x)  # Draw the background and player

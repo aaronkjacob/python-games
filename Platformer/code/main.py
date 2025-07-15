@@ -121,8 +121,8 @@ class Player(pygame.sprite.Sprite):
         self.update()  # Update the rect position based on sprite
     def update(self):
         self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))  # Update the rect position based on sprite
-    def draw(self, screen):
-        screen.blit(self.sprite, (self.rect.x, self.rect.y))  # Draw the player
+    def draw(self, screen, offset_x):
+        screen.blit(self.sprite, (self.rect.x-offset_x, self.rect.y))  # Draw the player
         self.mask = pygame.mask.from_surface(self.sprite)  # Create a mask from the sprite for collision detection
 
 class Object(pygame.sprite.Sprite):
@@ -133,8 +133,8 @@ class Object(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.name = name
-    def draw(self, screen):
-        screen.blit(self.image, (self.rect.x, self.rect.y))  # Draw the object on the screen
+    def draw(self, screen, offset_x):
+        screen.blit(self.image, (self.rect.x-offset_x, self.rect.y))  # Draw the object on the screen
 class Block(Object):
     def __init__(self, x, y, size):
         super().__init__(x, y, size, size)
@@ -154,13 +154,13 @@ def get_background(name):
             tiles.append(pos)
     return tiles, image
 
-def draw(screen,background, bg_image, player, Objects):
+def draw(screen,background, bg_image, player, Objects,offset_x):
     for tile in background:
         screen.blit(bg_image, tile)
     for obj in Objects:
-        obj.draw(screen)
+        obj.draw(screen, offset_x)  # Draw each object on the screen with offset
     pygame.display.update()
-    player.draw(screen)  # Draw the player on the screen
+    player.draw(screen, offset_x)  # Draw the player on the screen
 
 
 
@@ -198,6 +198,9 @@ def main(screen):
     player = Player(100, 100, 50, 50)  # Create a player instance
     floor = [Block(i*block_size, SCREEN_HEIGHT - block_size, block_size) for i in range(-SCREEN_WIDTH // block_size, SCREEN_WIDTH*2 // block_size)]  # Create a floor of blocks
 
+    offset_x = 0
+    scroll_area_width = 200  # Width of the scroll area
+
     running = True # Main game loop
     while running:
         for event in pygame.event.get():
@@ -214,7 +217,11 @@ def main(screen):
         player.loop(FPS)  # Update player position
         handle_move(player, floor) # Handle player movement
         # Fill the screen with the background color
-        draw(screen,background,bg_image, player, floor)
+        draw(screen,background,bg_image, player, floor, offset_x)  # Draw the background and player
+
+        if (player.rect.right - offset_x >= SCREEN_WIDTH - scroll_area_width and player.x_vel > 0) or (
+            player.rect.left - offset_x <= scroll_area_width and player.x_vel < 0):
+            offset_x += player.x_vel
 
 
 

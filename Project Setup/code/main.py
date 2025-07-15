@@ -7,7 +7,7 @@ from input import handle_input
 pygame.init()
 
 # Set up window dimensions
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer Game")
 

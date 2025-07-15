@@ -43,10 +43,20 @@ def load_spritesheet(dir1,dr2,width,height,direction=False):
             all_sprites[image.replace('.png','')] = sprites
     return all_sprites
 
+def get_block(size):
+    path = join("Platformer", "assets", "Terrain",  "Terrain.png")
+    image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(96, 0, size, size)
+    surface.blit(image, (0, 0), rect)
+    return pygame.transform.scale2x(surface)  # Scale the block image to double its size
+
 class Player(pygame.sprite.Sprite):
+    #super().__init__()
     COLOR = (255, 0, 0)  # Player color (red)
     GRAVITY = 1
     SPRITES = load_spritesheet("MainCharacters", "MaskDude", 32, 32, True) # Load player spritesheet
+    ANIMATION_DELAY = 3
 
     def __init__(self, x,y,width,height):
         self.rect = pygame.Rect(x, y, width, height)
@@ -74,10 +84,40 @@ class Player(pygame.sprite.Sprite):
         self.move(self.x_vel, self.y_vel)
 
         self.fall_count += 1
-    def draw(self, screen):
-        self.sprite = self.SPRITES["idle_" + self.direction][0] # Default sprite
-        screen.blit(self.sprite, (self.rect.x, self.rect.y))  # Draw the player sprite
+        self.update_sprite()  # Update the sprite based on movement and direction
 
+    def update_sprite(self):
+        sprite_sheet = 'idle'
+        if self.x_vel != 0:  # If moving, use walking animation
+            sprite_sheet = 'run'
+        sprite_sheet_name = sprite_sheet + '_' + self.direction
+        sprites = self.SPRITES[sprite_sheet_name] # Get the appropriate sprite sheet based on direction
+        sprite_index = (self.animation_count // self.ANIMATION_DELAY) % len(sprites) # Calculate the current sprite index based on animation count
+        self.sprite = sprites[sprite_index]  # Get the current sprite based on animation count
+        self.animation_count += 1  # Increment animation count for next frame
+        self.update()  # Update the rect position based on sprite
+    def update(self):
+        self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))  # Update the rect position based on sprite
+    def draw(self, screen):
+        screen.blit(self.sprite, (self.rect.x, self.rect.y))  # Draw the player
+        self.mask = pygame.mask.from_surface(self.sprite)  # Create a mask from the sprite for collision detection
+
+class Object(pygame.sprite.Sprite):
+    def __init__(self, x,y,width,height,name=None):
+        #super().__init__()
+        self.rect = pygame.Rect(x, y, width, height)
+        self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.width = width
+        self.height = height
+        self.name = name
+    def draw(self, screen):
+        screen.blit(self.image, (self.rect.x, self.rect.y))  # Draw the object on the screen
+class Block(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        block = get_block(size)
+        self.image.blit(block, (0,0)) # Load the block image and draw it on the object surface
+        self.mask = pygame.mask.from_surface(self.image)  # Create a mask from the block image for collision detection
 
 def get_background(name):
     # Load background image
@@ -91,9 +131,11 @@ def get_background(name):
             tiles.append(pos)
     return tiles, image
 
-def draw(screen,background, bg_image, player):
+def draw(screen,background, bg_image, player, Objects):
     for tile in background:
         screen.blit(bg_image, tile)
+    for obj in Objects:
+        obj.draw(screen)
     pygame.display.update()
     player.draw(screen)  # Draw the player on the screen
 
@@ -112,7 +154,10 @@ def main(screen):
 
     background, bg_image = get_background("Yellow.png")  # Load the background image
 
+    block_size = 96
+
     player = Player(100, 100, 50, 50)  # Create a player instance
+    blocks = [Block(0, SCREEN_HEIGHT - block_size, block_size)]
 
     running = True # Main game loop
     while running:
@@ -126,7 +171,7 @@ def main(screen):
         player.loop(FPS)  # Update player position
         handle_move(player) # Handle player movement
         # Fill the screen with the background color
-        draw(screen,background,bg_image, player)
+        draw(screen,background,bg_image, player, blocks)
 
 
 

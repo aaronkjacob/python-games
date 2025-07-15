@@ -177,13 +177,30 @@ def handle_vertical_collision(player, objects,dy):
         collided_objects.append(obj)  # Add collided objects to the list
     return collided_objects
 
+def collide(player, objects, dx):
+    player.move(dx, 0)  # Move player horizontally
+    player.update()  # Update player rect position
+    collided_objects = []  # List to store collided objects
+    for obj in objects:
+        if pygame.sprite.collide_rect(player, obj):
+            collided_objects = obj
+            break
+    player.move(-dx, 0)  # Move player back to original position
+    player.update()  # Update player rect position
+    return collided_objects  # Return the first collided object
+
+
 
 def handle_move(player, objects):
     keys = pygame.key.get_pressed()
     player.x_vel = 0  # Reset horizontal velocity
-    if keys[pygame.K_LEFT]:
+
+    collide_left = collide(player, objects, -PLAYER_VELOCITY * 2)  # Check for collision when moving left
+    collide_right = collide(player, objects, PLAYER_VELOCITY * 2)  # Check for collision when moving right
+
+    if keys[pygame.K_LEFT] and not collide_left:  # If left key is pressed and no collision
         player.move_left(PLAYER_VELOCITY)
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_RIGHT] and not collide_right:  # If right key is pressed and no collision
         player.move_right(PLAYER_VELOCITY)
 
     handle_vertical_collision(player, objects, player.y_vel)  # Handle vertical collisions
@@ -197,6 +214,7 @@ def main(screen):
 
     player = Player(100, 100, 50, 50)  # Create a player instance
     floor = [Block(i*block_size, SCREEN_HEIGHT - block_size, block_size) for i in range(-SCREEN_WIDTH // block_size, SCREEN_WIDTH*2 // block_size)]  # Create a floor of blocks
+    objects = [*floor, Block(0,SCREEN_HEIGHT - block_size * 2, block_size), Block(block_size * 3, SCREEN_HEIGHT - block_size * 4, block_size)]  # Create some additional blocks
 
     offset_x = 0
     scroll_area_width = 200  # Width of the scroll area
@@ -215,9 +233,9 @@ def main(screen):
                         player.jump()
 
         player.loop(FPS)  # Update player position
-        handle_move(player, floor) # Handle player movement
+        handle_move(player, objects) # Handle player movement
         # Fill the screen with the background color
-        draw(screen,background,bg_image, player, floor, offset_x)  # Draw the background and player
+        draw(screen,background,bg_image, player, objects, offset_x)  # Draw the background and player
 
         if (player.rect.right - offset_x >= SCREEN_WIDTH - scroll_area_width and player.x_vel > 0) or (
             player.rect.left - offset_x <= scroll_area_width and player.x_vel < 0):

@@ -157,7 +157,7 @@ def main(screen):
     block_size = 96
 
     player = Player(100, 100, 50, 50)  # Create a player instance
-    blocks = [Block(0, SCREEN_HEIGHT - block_size, block_size)]
+    floor = [Block(i*block_size, SCREEN_HEIGHT - block_size, block_size) for i in range(-SCREEN_WIDTH // block_size, SCREEN_WIDTH*2 // block_size)]  # Create a floor of blocks
 
     running = True # Main game loop
     while running:
@@ -171,7 +171,7 @@ def main(screen):
         player.loop(FPS)  # Update player position
         handle_move(player) # Handle player movement
         # Fill the screen with the background color
-        draw(screen,background,bg_image, player, blocks)
+        draw(screen,background,bg_image, player, floor)
 
 
 

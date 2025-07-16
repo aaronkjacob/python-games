@@ -13,6 +13,14 @@ class Player(pygame.sprite.Sprite):
     super().__init__()
     self.x = x
     self.y = y
+    self.rect = pygame.Rect(self.x,self.y,50,50)
+    self.surf = pygame.surface.Surface((50,50),pygame.SRCALPHA)
+    self.surf.fill('red')
+  def draw(self):
+    screen.blit(self.surf, self.rect)
+
+player = Player(SCREEN_WIDTH/2, 600)
+
 
 running = True
 while running:
@@ -22,7 +30,7 @@ while running:
 
     screen.fill((0, 0, 0))
 
-
+    player.draw()
 
     pygame.display.update()
     clock.tick(60)

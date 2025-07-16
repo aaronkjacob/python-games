@@ -8,6 +8,12 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 clock = pygame.time.Clock()
 
+class Player(pygame.sprite.Sprite):
+  def __init__(self,x,y):
+    super().__init__()
+    self.x = x
+    self.y = y
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -16,7 +22,7 @@ while running:
 
     screen.fill((0, 0, 0))
 
-    
+
 
     pygame.display.update()
     clock.tick(60)

@@ -11,7 +11,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Sprite Sheet Tutorial")
 
 
-class Player:
+class Animation:
   def __init__(self,x,y):
     self.x = x
     self.y = y
@@ -36,7 +36,7 @@ class Player:
         self.frame = 0
     screen.blit(self.animation_list[self.frame], (self.x,self.y))  # Draw the current frame of the sprite sheet at the center of the screen
 
-player = Player(0,0)
+player = Animation(0,0)
 player.load_sprite_sheet()
 
 # Main loop

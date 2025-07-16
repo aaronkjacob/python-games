@@ -14,15 +14,18 @@ class Animation:
   def __init__(self):
     self.frame = 0
     self.animation_steps = 10
-
-  def load_sprite_sheet(self, directory, screen):
-    self.sprite_sheet_image = pygame.image.load(directory).convert_alpha() # Load the sprite sheet image
-    self.screen = screen  # Store the screen reference for drawing
-
     # create animation list
     self.animation_list = []
     self.last_update = pygame.time.get_ticks()
     self.animation_cooldown = 40 # milliseconds
+
+
+  def load_sprite_sheet(self, directory, screen):
+    self.sprite_sheet_image = pygame.image.load(directory).convert_alpha() # Load the sprite sheet image
+    self.screen = screen  # Store the screen reference for drawing
+    self.direcotory = directory  # Store the directory for debugging
+    print(self.direcotory)
+
 
     for x in range(self.animation_steps):
       self.animation_list.append(SpriteSheet.get_image(self.sprite_sheet_image, 32, 32, x, 2))  # Get each frame of the sprite sheetz

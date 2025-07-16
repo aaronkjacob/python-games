@@ -1,6 +1,8 @@
 import pygame
 import sys
 from ExtractSpriteSheet import SpriteSheet  # Import the SpriteSheet class from the other file
+from ExtractSpriteSheet import Animation  # Import the Animation class from the other file
+from input import wasd_input  # Import the wasd_input function from the input module
 
 # Initialize Pygame
 pygame.init()
@@ -11,50 +13,46 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Sprite Sheet Tutorial")
 
 
-class Animation:
-  def __init__(self,x,y):
+
+
+class Player(Animation):
+  def __init__(self, x, y, directory):
+    super().__init__()  # Initialize the Animation class
     self.x = x
     self.y = y
-  def load_sprite_sheet(self):
-    sprite_sheet_image = pygame.image.load("assets/MainCharacters/NinjaFrog/idle.png").convert_alpha() # Load the sprite sheet image
+    self.directory = directory
+    self.load_sprite_sheet(directory, screen)  # Load the sprite sheet frames
+  def draw(self):
+    self.draw_sprite_sheet()  # Draw the sprite sheet animation
 
-    # create animation list
-    self.animation_list = []
-    self.animation_steps = 10
-    self.last_update = pygame.time.get_ticks()
-    self.animation_cooldown = 40 # milliseconds
-    self.frame = 0
 
-    for x in range(self.animation_steps):
-      self.animation_list.append(SpriteSheet.get_image(sprite_sheet_image, 32, 32, x, 2))  # Get each frame of the sprite sheet
-  def draw_sprite_sheet(self):
-    current_time = pygame.time.get_ticks()
-    if current_time - self.last_update >= self.animation_cooldown:
-      self.last_update = current_time
-      self.frame += 1
-      if self.frame >= len(self.animation_list):
-        self.frame = 0
-    screen.blit(self.animation_list[self.frame], (self.x,self.y))  # Draw the current frame of the sprite sheet at the center of the screen
+player = Player(400, 300, "assets/MainCharacters/NinjaFrog/idle.png")  # Create a player instance and load the sprite sheet
+player.draw()
 
-player = Animation(0,0)
-player.load_sprite_sheet()
 
 # Main loop
 running = True
 clock = pygame.time.Clock()
 while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            sys.exit()
-            pygame.quit()
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+        running = False
+        sys.exit()
+        pygame.quit()
 
-    screen.fill('white')  # Fill the screen with black
+  screen.fill('white')  # Fill the screen with black
 
-    player.draw_sprite_sheet()  # Draw the sprite sheet animation
+  if wasd_input()['d']:
+    player.draw()  # Draw the idle sprite sheet
+    player.x += 5  # Move right
+  elif wasd_input()['a']:
+    player.draw()  # Draw the idle sprite sheet
+    player.x -= 5  # Move left
+    
+  player.draw()  # Draw the sprite sheet animation
 
-    pygame.display.update()
-    clock.tick(60)
+  pygame.display.update()
+  clock.tick(60)
 
 pygame.quit()
 sys.exit()

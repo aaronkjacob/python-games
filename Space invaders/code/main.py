@@ -1,6 +1,5 @@
 import pygame
 import sys
-from input import keyPressed
 
 pygame.init()
 SCREEN_WIDTH = 1000
@@ -21,20 +20,26 @@ class Player(pygame.sprite.Sprite):
     self.surf.fill('red')
   def draw(self):
     screen.blit(self.surf, self.rect)
-  def move(self):
-    if keyPressed() == 'd':
-      self.vx = self.speed
-    elif keyPressed() == 'a':
-      self.vx = -self.speed
-    else:
-      self.vx = 0
-  def bullet(self):
-    pass
   def update(self):
     self.rect.x += self.vx
     self.draw()
-    self.move()
-      
+
+class PlayerBullet(pygame.sprite.Sprite):
+  def __init__(self):
+    super().__init__()
+    self.x = player.rect.centerx
+    self.y = player.rect.top
+    self.vy = 0
+    self.speed = 15
+    self.delay = 0
+  def draw(self):
+    self.delay += 1
+    pygame.draw.circle(screen, 'white', (self.x,self.y), 5)
+    self.vy = self.speed
+    self.y -= self.vy
+    if self.y < 0:
+      self.kill()
+    
 
 player = Player(SCREEN_WIDTH/2, 600)
 playerBullets = []
@@ -44,10 +49,26 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE]:
+      playerBullets.append(PlayerBullet())
+    if keys[pygame.K_a]:
+      player.vx = -player.speed
+    if keys[pygame.K_d]:
+      player.vx = player.speed
+    
+    if (not keys[pygame.K_a]) and (not keys[pygame.K_d]):
+      player.vx = 0
 
     screen.fill((0, 0, 0))
 
     player.update()
+
+
+    for bullet in playerBullets:
+      bullet.draw()
+      bullet.delay = 0
+
 
     pygame.display.update()
     clock.tick(60)

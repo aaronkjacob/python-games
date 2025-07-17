@@ -30,7 +30,7 @@ class PlayerBullet(pygame.sprite.Sprite):
     self.x = player.rect.centerx
     self.y = player.rect.top
     self.vy = 0
-    self.speed = 15
+    self.speed = 20
     self.delay = 0
   def draw(self):
     self.delay += 1

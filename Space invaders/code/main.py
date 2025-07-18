@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 pygame.init()
 SCREEN_WIDTH = 1300
@@ -42,8 +43,31 @@ class PlayerBullet(pygame.sprite.Sprite):
       self.kill()
       playerBullets.remove(self)
 
+class enemy(pygame.sprite.Sprite):
+  def __init__(self, x, y, width, height):
+    super().__init__()
+    self.x = x
+    self.y = y
+    self.width = width
+    self.height = height
+    self.color = 'white'
+    self.health = 2
+    self.rect = pygame.Rect(self.x,self.y,self.width,self.height)
+    self.surf = pygame.Surface((self.rect.width,self.rect.height))
+  def draw(self):
+    self.surf.fill(self.color)
+    screen.blit(self.surf,self.rect)
+    self.color = 'white'
+    
+
+
 player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT-100)
 playerBullets = []
+
+invaders = []
+
+for i in range(3):
+  invaders.append(enemy((400*i) + 100,100,40,40))
 
 running = True
 while running:
@@ -62,7 +86,8 @@ while running:
 
     screen.fill((0, 0, 0))
 
-    collision_rect = pygame.draw.rect(screen, 'white', (SCREEN_WIDTH/2,100,50,50))
+    for invader in invaders:
+      invader.draw()
 
     player.update()
 
@@ -73,8 +98,19 @@ while running:
 
     for bullet in playerBullets:
       bullet.draw()
-      if collision_rect.collidepoint(bullet.x, bullet.y):
-        pygame.draw.rect(screen, 'red', (SCREEN_WIDTH/2,100,50,50))
+      for invader in invaders:
+        if invader.rect.collidepoint(bullet.x,bullet.y):
+          invader.health += 1
+          invader.color = 'red'
+          bullet.kill()
+          playerBullets.remove(bullet)
+        if invader.health > 3:
+          invader.kill()
+          invaders.remove(invader)
+
+    if len(invaders) <= 0:
+      for i in range(3):
+        invaders.append(enemy(random.randint(10,SCREEN_WIDTH-50),100,40,40))
 
     pygame.display.update()
     clock.tick(60)

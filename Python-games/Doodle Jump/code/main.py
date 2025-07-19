@@ -5,7 +5,7 @@ import pygame
 pygame.init()
 
 # Set up window dimensions
-SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 400, 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Jumpy")
 
@@ -13,6 +13,10 @@ pygame.display.set_caption("Jumpy")
 clock = pygame.time.Clock()
 running = True
 
+# load images
+bg_image = pygame.image.load('Python-games/Doodle Jump/Assets/bg.png').convert_alpha()
+
+# game loop
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -21,7 +25,8 @@ while running:
     # Fill the screen with a color (e.g., black)
     screen.fill((0, 0, 0))
 
-    
+    # Draw background
+    screen.blit(bg_image, (0,0,SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # Update the display
     pygame.display.flip()

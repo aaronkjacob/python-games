@@ -14,7 +14,20 @@ clock = pygame.time.Clock()
 running = True
 
 # load images
-bg_image = pygame.image.load('Python-games/Doodle Jump/Assets/bg.png').convert_alpha()
+jumpy_image = pygame.image.load('Python-games/Doodle Jump/Assets/jump.png')
+
+bg_image = pygame.image.load('Python-games/Doodle Jump/Assets/bg.png').convert_alpha() # Background Image
+
+# Player class
+class Player():
+    def __init__(self, x, y):
+        self.image = jumpy_image
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y)
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+jumpy = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT - 150)
 
 # game loop
 while running:
@@ -27,6 +40,9 @@ while running:
 
     # Draw background
     screen.blit(bg_image, (0,0,SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    # Draw player
+    jumpy.draw()
 
     # Update the display
     pygame.display.flip()

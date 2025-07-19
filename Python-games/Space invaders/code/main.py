@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 
+
 pygame.init()
 SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 900
@@ -15,10 +16,11 @@ class Player(pygame.sprite.Sprite):
     self.x = x
     self.y = y
     self.vx = 0
-    self.speed = 8
+    self.speed = 10
     self.rect = pygame.Rect(self.x,self.y,50,50)
     self.surf = pygame.surface.Surface((50,50),pygame.SRCALPHA)
-    self.surf.fill('red')
+    self.surf.fill('blue')
+    self.damage = 10
   def draw(self):
     screen.blit(self.surf, self.rect)
   def update(self):
@@ -26,7 +28,7 @@ class Player(pygame.sprite.Sprite):
     self.draw()
 
 bullet_delay_count = 0
-bullet_delay = 30
+bullet_delay = 20
 
 class PlayerBullet(pygame.sprite.Sprite):
   def __init__(self):
@@ -34,9 +36,9 @@ class PlayerBullet(pygame.sprite.Sprite):
     self.x = player.rect.centerx
     self.y = player.rect.top
     self.vy = 0
-    self.speed = 20
+    self.speed = 40
   def draw(self):
-    pygame.draw.circle(screen, 'white', (self.x,self.y), 5)
+    pygame.draw.circle(screen, 'white', (self.x,self.y), 10)
     self.vy = self.speed
     self.y -= self.vy
     if self.y < 0:
@@ -51,23 +53,54 @@ class enemy(pygame.sprite.Sprite):
     self.width = width
     self.height = height
     self.color = 'white'
-    self.health = 2
+    self.START_HEALTH = 16
+    self.health = self.START_HEALTH
     self.rect = pygame.Rect(self.x,self.y,self.width,self.height)
     self.surf = pygame.Surface((self.rect.width,self.rect.height))
+    self.health_width = self.width    
+
   def draw(self):
     self.surf.fill(self.color)
     screen.blit(self.surf,self.rect)
     self.color = 'white'
-    
+    self.health_rect = pygame.draw.rect(screen, 'red', (self.x, self.rect.top - 20,self.health_width,10))
+    self.health_width = self.width*(self.health/self.START_HEALTH)
+
+class Text():
+  def __init__(self,text,fontSize,coordinates, color):
+    self.text = text
+    self.fontSize = fontSize
+    self.coordinates = coordinates
+    self.font = pygame.font.Font(None, fontSize)
+    self.color = color
+  def draw(self):
+    text = self.font.render(self.text, True, str(self.color))
+    text_rect = text.get_rect(center=(self.coordinates))
+    screen.blit(text, text_rect)
+
+def UpdateWaves(wave):
+  if wave <= 3 and len(invaders) <= 0:
+    if wave == 1:
+      for i in range(5):
+        invaders.append(enemy(250*i + 100,100,40,40))
+    if wave == 2:
+      for i in range(6):
+        invaders.append(enemy(210*i + 100,100,40,40))
+    if wave == 3:
+      for i in range(7):
+        invaders.append(enemy(random.randint(180,200)*i + 100,100,40,40))
+  elif wave > 3 and len(invaders) <= 0:
+    for i in range(7):
+      invaders.append(enemy(random.randint(180,200)*i + 100,100,40,40))
+      invader.health += 10
 
 
 player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT-100)
 playerBullets = []
 
 invaders = []
+wave = 1
 
-for i in range(3):
-  invaders.append(enemy((400*i) + 100,100,40,40))
 
 running = True
 while running:
@@ -86,6 +119,8 @@ while running:
 
     screen.fill((0, 0, 0))
 
+    Text(('wave: ' + str(wave)),50,(SCREEN_WIDTH/2, SCREEN_HEIGHT/2), 'red').draw()
+
     for invader in invaders:
       invader.draw()
 
@@ -95,22 +130,24 @@ while running:
       playerBullets.append(PlayerBullet())
       bullet_delay_count = 0
 
+    UpdateWaves(wave)
 
     for bullet in playerBullets:
       bullet.draw()
       for invader in invaders:
-        if invader.rect.collidepoint(bullet.x,bullet.y):
-          invader.health += 1
+        if invader.rect.collidepoint(bullet.x,bullet.y) or invader.rect.collidepoint(bullet.x - 8,bullet.y) or invader.rect.collidepoint(bullet.x+8,bullet.y):
+          invader.health -= player.damage
           invader.color = 'red'
           bullet.kill()
           playerBullets.remove(bullet)
-        if invader.health > 3:
+        if invader.health <= 0:
           invader.kill()
           invaders.remove(invader)
+          
 
     if len(invaders) <= 0:
-      for i in range(3):
-        invaders.append(enemy(random.randint(10,SCREEN_WIDTH-50),100,40,40))
+      wave += 1
+    print(len(invaders))
 
     pygame.display.update()
     clock.tick(60)

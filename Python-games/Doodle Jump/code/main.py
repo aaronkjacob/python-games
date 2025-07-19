@@ -21,7 +21,7 @@ while running:
     # Fill the screen with a color (e.g., black)
     screen.fill((0, 0, 0))
 
-
+    
 
     # Update the display
     pygame.display.flip()

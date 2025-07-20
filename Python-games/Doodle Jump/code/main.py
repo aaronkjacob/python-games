@@ -11,11 +11,14 @@ pygame.display.set_caption("Jumpy")
 
 # Running variable and clock
 clock = pygame.time.Clock()
+FPS = 60
 running = True
+
+# Game variables
+GRAVITY = 1
 
 # load images
 jumpy_image = pygame.image.load('Python-games/Doodle Jump/Assets/jump.png')
-
 bg_image = pygame.image.load('Python-games/Doodle Jump/Assets/bg.png').convert_alpha() # Background Image
 
 # Player class
@@ -26,8 +29,42 @@ class Player():
         self.height = 40
         self.rect = pygame.Rect(0, 0, self.width, self.height)
         self.rect.center = (x,y)
-    def draw(self):        
-        screen.blit(self.image, (self.rect.x - 12, self.rect.y - 5))
+        self.vel_y = 0
+        self.flip = False
+    def move(self):
+        #reset moving variables
+        dx = 0
+        dy = 0
+
+        #process keypresses
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            dx = -10
+            self.flip = True
+        if key[pygame.K_d]:
+            dx = 10
+            self.flip = False
+
+        # Gravity
+        self.vel_y += GRAVITY
+        dy += self.vel_y
+
+        # ensure player doesn't leave the screen
+        if self.rect.left + dx < 0:
+            dx = -self.rect.left
+        if self.rect.right + dx > SCREEN_WIDTH:
+            dx = SCREEN_WIDTH - self.rect.right
+        
+        if self.rect.bottom + dy > SCREEN_HEIGHT:
+            dy = 0
+            self.vel_y = -20
+
+        # update rec pos
+        self.rect.x += dx
+        self.rect.y += dy
+
+    def draw(self):
+        screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
         pygame.draw.rect(screen, 'black', self.rect, 2)
 
 
@@ -46,10 +83,11 @@ while running:
     screen.blit(bg_image, (0,0,SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # Draw player
+    jumpy.move()
     jumpy.draw()
 
     # Update the display
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(FPS)
 
 pygame.quit()

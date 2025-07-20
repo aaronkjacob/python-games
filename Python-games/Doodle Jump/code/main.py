@@ -50,6 +50,7 @@ class Player():
         self.height = 40
         self.rect = pygame.Rect(0, 0, self.width, self.height)
         self.rect.center = (x,y)
+        self.speed = 10
         self.vel_y = 0
         self.flip = False
     def move(self):
@@ -61,10 +62,10 @@ class Player():
         #process keypresses
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            dx = -10
+            dx = -self.speed
             self.flip = True
         if key[pygame.K_d]:
-            dx = 10
+            dx = self.speed
             self.flip = False
 
         # Gravity
@@ -100,7 +101,6 @@ class Player():
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
-        pygame.draw.rect(screen, 'black', self.rect, 2)
 
 # platform class
 class Platform(pygame.sprite.Sprite):
@@ -145,7 +145,7 @@ while running:
         if len(platform_group) < MAX_PLATFORMS:
             p_w = random.randint(40,60)
             p_x = random.randint(0, SCREEN_WIDTH-p_w)
-            p_y = platform.rect.y -random.randint(90,125)
+            p_y = platform.rect.y -random.randint(100,122)
             platform = Platform(p_x, p_y,p_w)
             platform_group.add(platform)
 
@@ -156,6 +156,8 @@ while running:
         # Draw player
         scroll = jumpy.move()
         jumpy.draw()
+
+        score += scroll
 
         # check game over
         if jumpy.rect.top > SCREEN_HEIGHT:

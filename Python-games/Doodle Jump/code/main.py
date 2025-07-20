@@ -1,5 +1,6 @@
 #import necessary modules
 import pygame
+import random
 
 # Initialize Pygame
 pygame.init()
@@ -16,10 +17,12 @@ running = True
 
 # Game variables
 GRAVITY = 1
+MAX_PLATFORMS = 10
 
 # load images
-jumpy_image = pygame.image.load('Python-games/Doodle Jump/Assets/jump.png')
+jumpy_image = pygame.image.load('Python-games/Doodle Jump/Assets/jump.png').convert_alpha()
 bg_image = pygame.image.load('Python-games/Doodle Jump/Assets/bg.png').convert_alpha() # Background Image
+platform_image = pygame.image.load('Python-games/Doodle Jump/Assets/wood.png').convert_alpha()
 
 # Player class
 class Player():
@@ -67,8 +70,29 @@ class Player():
         screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
         pygame.draw.rect(screen, 'black', self.rect, 2)
 
+# platform class
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, x, y, width):
+        super().__init__()
+        self.image = pygame.transform.scale(platform_image, (width, 10))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
+# player instance
 jumpy = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT - 150)
+
+# Platform group
+platform_group = pygame.sprite.Group()
+
+# create temporary platforms
+for p in range(MAX_PLATFORMS):
+    p_w = random.randint(40,60)
+    p_x = random.randint(0,SCREEN_WIDTH-p_w)
+    p_y = p * random.randint(80,120)
+    platform = Platform(p_x,p_y,p_w)
+    platform_group.add(platform)
+
 
 # game loop
 while running:
@@ -81,6 +105,8 @@ while running:
 
     # Draw background
     screen.blit(bg_image, (0,0,SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    platform_group.draw(screen)
 
     # Draw player
     jumpy.move()

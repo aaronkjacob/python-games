@@ -16,13 +16,23 @@ FPS = 60
 running = True
 
 # Game variables
+SCROLL_THRESHOLD = 200
 GRAVITY = 1
 MAX_PLATFORMS = 10
+scroll = 0
+bg_scroll = 0
+game_over = False
 
 # load images
 jumpy_image = pygame.image.load('Python-games/Doodle Jump/Assets/jump.png').convert_alpha()
 bg_image = pygame.image.load('Python-games/Doodle Jump/Assets/bg.png').convert_alpha() # Background Image
 platform_image = pygame.image.load('Python-games/Doodle Jump/Assets/wood.png').convert_alpha()
+
+# function for drawing the background
+def draw_bg(bg_scroll):
+    screen.blit(bg_image, (0,0+bg_scroll))
+    screen.blit(bg_image, (0,-600+bg_scroll))
+
 
 # Player class
 class Player():
@@ -36,6 +46,7 @@ class Player():
         self.flip = False
     def move(self):
         #reset moving variables
+        scroll = 0
         dx = 0
         dy = 0
 
@@ -58,13 +69,26 @@ class Player():
         if self.rect.right + dx > SCREEN_WIDTH:
             dx = SCREEN_WIDTH - self.rect.right
         
-        if self.rect.bottom + dy > SCREEN_HEIGHT:
-            dy = 0
-            self.vel_y = -20
+        # Check collision with platform
+        for platform in platform_group:
+            #collision in the y direction
+            if platform.rect.colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                if self.rect.bottom < platform.rect.centery:
+                    if self.vel_y > 0:
+                        self.rect.bottom = platform.rect.top
+                        dy = 0
+                        self.vel_y = -20
+
+        # check if the player has bounced to the top of the screen
+        if self.rect.top <= SCROLL_THRESHOLD:
+            if self.vel_y < 0:
+                scroll = -dy
 
         # update rec pos
         self.rect.x += dx
-        self.rect.y += dy
+        self.rect.y += dy + scroll
+
+        return scroll
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
@@ -78,6 +102,12 @@ class Platform(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+    def update(self, scroll):
+        # update platform's vertical positoin
+        self.rect.y += scroll
+        if self.rect.top > SCREEN_HEIGHT:
+            self.kill()
+            platform_group.remove(self)
 
 # player instance
 jumpy = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT - 150)
@@ -85,13 +115,9 @@ jumpy = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT - 150)
 # Platform group
 platform_group = pygame.sprite.Group()
 
-# create temporary platforms
-for p in range(MAX_PLATFORMS):
-    p_w = random.randint(40,60)
-    p_x = random.randint(0,SCREEN_WIDTH-p_w)
-    p_y = p * random.randint(80,120)
-    platform = Platform(p_x,p_y,p_w)
-    platform_group.add(platform)
+# create starting platform
+platform = Platform((SCREEN_WIDTH / 2) - 50, SCREEN_HEIGHT-100,100)
+platform_group.add(platform)
 
 
 # game loop
@@ -101,16 +127,31 @@ while running:
             running = False
 
     # Fill the screen with a color (e.g., black)
-    screen.fill((0, 0, 0))
 
     # Draw background
-    screen.blit(bg_image, (0,0,SCREEN_WIDTH, SCREEN_HEIGHT))
+    bg_scroll += scroll
+    if bg_scroll >= 600:
+        bg_scroll = 0
+    draw_bg(bg_scroll)
 
+    if len(platform_group) < MAX_PLATFORMS:
+        p_w = random.randint(40,60)
+        p_x = random.randint(0, SCREEN_WIDTH-p_w)
+        p_y = platform.rect.y -random.randint(90,125)
+        platform = Platform(p_x, p_y,p_w)
+        platform_group.add(platform)
+
+    # update platforms
+    platform_group.update(scroll)
     platform_group.draw(screen)
 
     # Draw player
-    jumpy.move()
+    scroll = jumpy.move()
     jumpy.draw()
+
+    # check game over
+    if jumpy.rect.top > SCREEN_HEIGHT:
+        game_over = True
 
     # Update the display
     pygame.display.flip()

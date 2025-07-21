@@ -157,7 +157,9 @@ while running:
         scroll = jumpy.move()
         jumpy.draw()
 
-        score += scroll
+        score += int(scroll/10)
+
+        draw_text('SCORE: ' + str(score), font_small, 'black', 130,100)
 
         # check game over
         if jumpy.rect.top > SCREEN_HEIGHT:

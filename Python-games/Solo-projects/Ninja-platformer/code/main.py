@@ -14,11 +14,14 @@ clock = pygame.time.Clock()
 FPS = 60
 
 # background image
-bg_image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/background.png')
+bg_image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/background.png').convert_alpha()
 bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT+260))
 
 # game variables
 GRAVITY = 1
+offset_x = 0
+tile_offset = 0
+
 
 # player class
 class Player(pygame.sprite.Sprite):
@@ -28,7 +31,7 @@ class Player(pygame.sprite.Sprite):
     self.y = y
     self.animation_count = 1
     self.animage_frame = [0,1,2,3]
-    self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja1.png')
+    self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja1.png').convert_alpha()
     self.rect = pygame.Rect(x,y,self.image.get_width(),self.image.get_height())
     self.speed = 10
     self.flip = True
@@ -38,6 +41,7 @@ class Player(pygame.sprite.Sprite):
     self.idle = True
     self.moving = False
   def move(self):
+    global offset_x
     dx = 0
     dy = 0
 
@@ -69,23 +73,63 @@ class Player(pygame.sprite.Sprite):
     if self.rect.bottom + dy >= SCREEN_HEIGHT and dy > 0:
       dy = 0
       self.jump_count = 0
+      self.rect.bottom = SCREEN_HEIGHT
+
+    if self.rect.right > SCREEN_WIDTH-400 and dx > 0:
+      dx = 0
+      offset_x += self.speed
+    if self.rect.left < 400 and dx < 0:
+      dx = 0
+      offset_x -= self.speed
+
+    # collision with tile
+    for tile in tiles:
+      if self.rect.colliderect(tile.rect):
+          dy = 0
+          self.rect.bottom = tile.rect.top
+
 
     self.rect.x += dx
     self.rect.y += dy
   def draw(self):
     # animate and draw character
-    if self.animation_count > 4: # if the animatoin count is greater than the number of frames then reset the frames
+    if self.animation_count > 4 and self.idle == True: # if the animatoin count is greater than the number of frames then reset the frames
+      self.animation_count = 1
+    elif self.animation_count > 5 and self.moving == True:
       self.animation_count = 1
     if self.idle == True:
-      self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja' + str(int(self.animation_count)) + '.png') # load the image directer with the string form if the integer of the animatoin count for the image frame changes
+      self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja' + str(int(self.animation_count)) + '.png').convert_alpha() # load the image directer with the string form if the integer of the animatoin count for the image frame changes
     else:
-      self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja1.png')
+      self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/running/Ninja' + str(int(self.animation_count)) + '.png').convert_alpha() # load the image directer with the string form if the integer of the animatoin count for the image frame changes
     screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
     pygame.draw.rect(screen, 'white', self.rect, 2)
     self.animation_count += self.animation_speed
 
+class Tile(pygame.sprite.Sprite):
+  def __init__(self, x, y):
+    super().__init__()
+    self.x = x
+    self.y = y
+    self.image = pygame.image.load('C:/Users/aaron/OneDrive/Desktop/All My code/python-code/Python-games/Solo-projects/Ninja-platformer/assets/grass.png').convert_alpha()
+    self.rect = pygame.Rect(self.x, self.y, self.image.get_width(), self.image.get_height())
+  def draw(self):
+    screen.blit(self.image, (self.rect.x - offset_x, self.rect.y, self.rect.width, self.rect.height))
+
+def draw_bg():
+  screen.blit(bg_image, (0-offset_x,0))
+  screen.blit(bg_image, (SCREEN_WIDTH-offset_x,0))
+  screen.blit(bg_image, (-bg_image.get_width()-offset_x,0))
+
 # create an instance of player
 player = Player(SCREEN_WIDTH/2, 0)
+
+tiles = []
+
+
+for i in range(10):
+  tiles.append(Tile(i*100,SCREEN_WIDTH-97))
+
+
 
 # Main game loop
 running = True
@@ -94,12 +138,24 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Fill the screen with a color (e.g., black)
-    screen.blit(bg_image, (0,0))
+    draw_bg()
+    if offset_x >= SCREEN_WIDTH:
+      offset_x = 0
+
+    if offset_x <= -SCREEN_WIDTH:
+      offset_x = 0
+
+    tile_offset = offset_x
+    print(tile_offset)
 
     # draw player on the screen
     player.move()
-    player.draw()    
+    player.draw()
+
+    # draw tiles
+    for tile in tiles:
+      tile.draw()
+
 
     # Update the display
     pygame.display.flip()

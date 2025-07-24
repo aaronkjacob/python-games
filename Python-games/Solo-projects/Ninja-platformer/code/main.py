@@ -69,6 +69,7 @@ class Player(pygame.sprite.Sprite):
       self.vel_y = -20
       self.jump_count += 1
 
+
     # collision with bottom wall
     if self.rect.bottom + dy >= SCREEN_HEIGHT and dy > 0:
       dy = 0
@@ -85,8 +86,17 @@ class Player(pygame.sprite.Sprite):
     # collision with tile
     for tile in tiles:
       if self.rect.colliderect(tile.rect):
-          dy = 0
+        if dy > 0 and self.vel_y > 0:
+          dy = .5
+          self.vel_y = 0
+          self.jump_count = 0
           self.rect.bottom = tile.rect.top
+        elif self.rect.right + dx >= tile.rect.left and dx < 0:
+          dx = 0
+        elif self.rect.left + dx <= tile.rect.right and dx > 0:
+          dx = 0
+
+      
 
 
     self.rect.x += dx
@@ -111,9 +121,10 @@ class Tile(pygame.sprite.Sprite):
     self.x = x
     self.y = y
     self.image = pygame.image.load('C:/Users/aaron/OneDrive/Desktop/All My code/python-code/Python-games/Solo-projects/Ninja-platformer/assets/grass.png').convert_alpha()
-    self.rect = pygame.Rect(self.x, self.y, self.image.get_width(), self.image.get_height())
+    self.rect = pygame.Rect(self.x, self.y, 97, 97)
   def draw(self):
-    screen.blit(self.image, (self.rect.x - offset_x, self.rect.y, self.rect.width, self.rect.height))
+    self.rect = pygame.Rect(self.x - offset_x, self.y, 97, 97)
+    screen.blit(self.image, (self.rect.x, self.rect.y, self.rect.width - offset_x, self.rect.height))
 
 def draw_bg():
   screen.blit(bg_image, (0-offset_x,0))
@@ -126,8 +137,7 @@ player = Player(SCREEN_WIDTH/2, 0)
 tiles = []
 
 
-for i in range(10):
-  tiles.append(Tile(i*100,SCREEN_WIDTH-97))
+tiles.append(Tile(SCREEN_WIDTH/2, SCREEN_HEIGHT-97))
 
 
 

@@ -20,7 +20,6 @@ bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT+260))
 # game variables
 GRAVITY = 1
 offset_x = 0
-tile_offset = 0
 
 
 # player class
@@ -91,9 +90,9 @@ class Player(pygame.sprite.Sprite):
           self.vel_y = 0
           self.jump_count = 0
           self.rect.bottom = tile.rect.top
-        elif self.rect.right + dx >= tile.rect.left and dx < 0:
+        elif self.rect.right + dx >= tile.rect.left - offset_x and dx < 0:
           dx = 0
-        elif self.rect.left + dx <= tile.rect.right and dx > 0:
+        elif self.rect.left + dx <= tile.rect.right - offset_x and dx > 0:
           dx = 0
 
       
@@ -154,9 +153,6 @@ while running:
 
     if offset_x <= -SCREEN_WIDTH:
       offset_x = 0
-
-    tile_offset = offset_x
-    print(tile_offset)
 
     # draw player on the screen
     player.move()

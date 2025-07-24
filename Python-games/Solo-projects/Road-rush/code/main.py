@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
     self.y_speed = self.starting_speed
     self.image = pygame.image.load('Python-games/Solo-projects/Road-rush/assets/motor-bike.png').convert_alpha()
     self.image = pygame.transform.scale(self.image, (100,100))
-    self.rect = pygame.Rect(self.x,self.y,80,100)
+    self.rect = pygame.Rect(self.x,self.y,70,90)
   def move(self):
     dx = 0
     key = pygame.key.get_pressed()
@@ -54,7 +54,7 @@ class Player(pygame.sprite.Sprite):
     self.rect.x += dx
 
   def draw(self):
-    screen.blit(self.image, (self.rect.x-10,self.rect.y,self.rect.width,self.rect.height))
+    screen.blit(self.image, (self.rect.x-15,self.rect.y,self.rect.width,self.rect.height))
 
 class Obstacle(pygame.sprite.Sprite):
   def __init__(self):
@@ -87,7 +87,7 @@ class Obstacle(pygame.sprite.Sprite):
    
     self.image = pygame.transform.scale(self.image, (200,200))
     self.image = pygame.transform.flip(self.image, False, True)
-    self.rect = pygame.Rect((self.x, self.y, 120,200))
+    self.rect = pygame.Rect((self.x, self.y, 110,170))
     self.speed = random.randint(int(player.y_speed-10),int(player.y_speed-5))
   def move(self):
     self.rect.y += self.speed + player.y_speed
@@ -95,7 +95,7 @@ class Obstacle(pygame.sprite.Sprite):
       self.kill()
       obstacle_group.remove(self)
   def draw(self):
-    screen.blit(self.image, (self.rect.x-40,self.rect.y,self.rect.width,self.rect.height))
+    screen.blit(self.image, (self.rect.x-45,self.rect.y-20,self.rect.width,self.rect.height))
 
 # create player instance
 player = Player(SCREEN_WIDTH/2 - 43, SCREEN_HEIGHT-150)

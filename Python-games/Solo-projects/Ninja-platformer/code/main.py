@@ -120,9 +120,10 @@ class Tile(pygame.sprite.Sprite):
     self.x = x
     self.y = y
     self.image = pygame.image.load('C:/Users/aaron/OneDrive/Desktop/All My code/python-code/Python-games/Solo-projects/Ninja-platformer/assets/grass.png').convert_alpha()
-    self.rect = pygame.Rect(self.x, self.y, 97, 97)
+    self.image = pygame.transform.scale(self.image, (100,100))
+    self.rect = pygame.Rect(self.x, self.y, 100, 100)
   def draw(self):
-    self.rect = pygame.Rect(self.x - offset_x, self.y, 97, 97)
+    self.rect = pygame.Rect(self.x - offset_x, self.y, 100, 100)
     screen.blit(self.image, (self.rect.x, self.rect.y, self.rect.width - offset_x, self.rect.height))
 
 def draw_bg():

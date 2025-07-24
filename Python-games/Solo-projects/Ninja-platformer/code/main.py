@@ -92,7 +92,7 @@ class Player(pygame.sprite.Sprite):
           self.rect.bottom = tile.rect.top
         elif self.rect.right + dx >= tile.rect.left - offset_x and dx < 0:
           dx = 0
-        elif self.rect.left + dx <= tile.rect.right - offset_x and dx > 0:
+        elif self.rect.left - dx <= tile.rect.right - offset_x and dx > 0:
           dx = 0
 
       

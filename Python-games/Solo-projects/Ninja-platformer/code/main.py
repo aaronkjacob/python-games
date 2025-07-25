@@ -20,6 +20,8 @@ bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT+260))
 # game variables
 GRAVITY = 1
 offset_x = 0
+bg_offset = 0
+scrolling = False
 
 
 # player class
@@ -31,7 +33,7 @@ class Player(pygame.sprite.Sprite):
     self.animation_count = 1
     self.animage_frame = [0,1,2,3]
     self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja1.png').convert_alpha()
-    self.rect = pygame.Rect(x,y,self.image.get_width(),self.image.get_height())
+    self.rect = pygame.Rect(x,y,80,90)
     self.speed = 10
     self.flip = True
     self.jump_count = 0
@@ -41,6 +43,8 @@ class Player(pygame.sprite.Sprite):
     self.moving = False
   def move(self):
     global offset_x
+    global bg_offset
+    global scrolling
     dx = 0
     dy = 0
 
@@ -75,12 +79,20 @@ class Player(pygame.sprite.Sprite):
       self.jump_count = 0
       self.rect.bottom = SCREEN_HEIGHT
 
+    # scrolling
     if self.rect.right > SCREEN_WIDTH-400 and dx > 0:
       dx = 0
       offset_x += self.speed
-    if self.rect.left < 400 and dx < 0:
+      bg_offset += self.speed
+      scrolling = True
+    elif self.rect.left < 400 and dx < 0:
       dx = 0
       offset_x -= self.speed
+      bg_offset -= self.speed
+      scrolling = True
+    else:
+      scrolling = False
+
 
     # collision with tile
     for tile in tiles:
@@ -90,10 +102,18 @@ class Player(pygame.sprite.Sprite):
           self.vel_y = 0
           self.jump_count = 0
           self.rect.bottom = tile.rect.top
-        elif self.rect.right + dx >= tile.rect.left - offset_x and dx < 0:
+        elif self.rect.right + dx >= tile.rect.left - offset_x and (dx < 0 or scrolling):
           dx = 0
-        elif self.rect.left - dx <= tile.rect.right - offset_x and dx > 0:
+          if scrolling:
+            offset_x += self.speed
+            bg_offset += self.speed
+        elif self.rect.left - dx <= tile.rect.right - offset_x and (dx > 0 or scrolling):
           dx = 0
+          if scrolling:
+            offset_x -= self.speed
+            bg_offset -= self.speed
+
+    print(scrolling)
 
       
 
@@ -110,7 +130,7 @@ class Player(pygame.sprite.Sprite):
       self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/idle/Ninja' + str(int(self.animation_count)) + '.png').convert_alpha() # load the image directer with the string form if the integer of the animatoin count for the image frame changes
     else:
       self.image = pygame.image.load('Python-games/Solo-projects/Ninja-platformer/assets/player/running/Ninja' + str(int(self.animation_count)) + '.png').convert_alpha() # load the image directer with the string form if the integer of the animatoin count for the image frame changes
-    screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+    screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 5, self.rect.y, self.rect.width, self.rect.height))
     pygame.draw.rect(screen, 'white', self.rect, 2)
     self.animation_count += self.animation_speed
 
@@ -127,9 +147,9 @@ class Tile(pygame.sprite.Sprite):
     screen.blit(self.image, (self.rect.x, self.rect.y, self.rect.width - offset_x, self.rect.height))
 
 def draw_bg():
-  screen.blit(bg_image, (0-offset_x,0))
-  screen.blit(bg_image, (SCREEN_WIDTH-offset_x,0))
-  screen.blit(bg_image, (-bg_image.get_width()-offset_x,0))
+  screen.blit(bg_image, (0-bg_offset,0))
+  screen.blit(bg_image, (SCREEN_WIDTH-bg_offset,0))
+  screen.blit(bg_image, (-bg_image.get_width()-bg_offset,0))
 
 # create an instance of player
 player = Player(SCREEN_WIDTH/2, 0)
@@ -149,11 +169,11 @@ while running:
             running = False
 
     draw_bg()
-    if offset_x >= SCREEN_WIDTH:
-      offset_x = 0
+    if bg_offset >= SCREEN_WIDTH:
+      bg_offset = 0
 
-    if offset_x <= -SCREEN_WIDTH:
-      offset_x = 0
+    if bg_offset <= -SCREEN_WIDTH:
+      bg_offset = 0
 
     # draw player on the screen
     player.move()

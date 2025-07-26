@@ -1,6 +1,7 @@
 import pygame
 import sys
 
+
 # Initialize Pygame
 pygame.init()
 
@@ -25,14 +26,51 @@ scrolling = False
 SCROLL_THRESH = 500
 game_over = False
 
-def tileMap(tileObj,tileList):
+def tileMap(tileObj,tileList, enemyObj, enemyList):
 # Create a floor of tiles across the bottom of the screen
   def tile_floor(tile_num,x,y):
     for i in range(tile_num):
       tile = tileObj(i*100 + x,y)
       tileList.append(tile)
+
+  # starting tile floor
   tile_floor(12,0,700)
-  tile_floor(3, 500, SCREEN_HEIGHT - 300)
+
+  # tile floor above ^ that one
+  tile_floor(3, 500, 500)
+  enemyList.append(enemyObj(600,SCREEN_HEIGHT-400))
+
+
+  # tile floor after init tile floor
+  tile_floor(4, 1400, 500)
+
+  tile_floor(2, 2200, 400)
+
+  tile_floor(1, 2600, 400)
+
+  tile_floor(3, 3000, 400)
+  enemyList.append(enemyObj(3200, 300))
+
+  tile_floor(5, 3700, 300)
+  enemyList.append(enemyObj(3900, 200))
+
+  tile_floor(1, 4600, SCREEN_HEIGHT-100)
+
+  tile_floor(6, 4900, SCREEN_HEIGHT-200)
+  enemyList.append(enemyObj(5200, SCREEN_HEIGHT-300))
+
+  tile_floor(1, 5200, SCREEN_HEIGHT-400)
+
+  tile_floor(3, 5900, 500)
+
+  tile_floor(2, 6600, 400)
+  enemyList.append(enemyObj(6650, 300))
+
+  tile_floor(1, 7300, 300)
+
+  tile_floor(1, 7800, 400)
+
+  #enemyList.clear()
 
 # make font variable
 font_small = pygame.font.SysFont('Lucida Sans', 20)
@@ -148,7 +186,7 @@ class Player(pygame.sprite.Sprite):
     self.animation_count += self.animation_speed
 
 # create enemy class
-class enemy(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite):
   def __init__(self, x, y):
     super().__init__()
     self.x = x
@@ -165,17 +203,26 @@ class enemy(pygame.sprite.Sprite):
     self.vel_y += GRAVITY
     dy += self.vel_y
 
-    if self.rect.top+5 < player.rect.bottom and self.rect.bottom+5 > player.rect.bottom:
-      if self.rect.x > player.rect.x:
-        dx = -5
-      if self.rect.x < player.rect.x:
-        dx = 5
+    if self.rect.centerx + 600 >= player.rect.centerx and self.rect.centerx - 600 <= player.rect.centerx: 
+      print('hi')
+      if self.rect.top+5 < player.rect.bottom and self.rect.bottom+5 > player.rect.bottom:
+        if self.rect.x > player.rect.x:
+          dx = -5
+        if self.rect.x < player.rect.x:
+          dx = 5
+    else:
+      print('bye')
     for tile in tiles:
       if self.rect.colliderect(tile.rect):
         dy = 0
         self.vel_y = 0
         self.rect.bottom = tile.rect.top
         print('hi')
+
+    if self.rect.top > SCREEN_HEIGHT:
+      self.kill()
+      enemies.remove(self)
+      
     if self.rect.colliderect(player.rect):
       game_over = True
 
@@ -215,10 +262,9 @@ player = Player(100, 0)
 tiles = []
 
 enemies = []
-enemies.append(enemy(600,SCREEN_HEIGHT-400))
 
 # draw tileMap
-tileMap(Tile,tiles)
+tileMap(Tile,tiles, Enemy, enemies)
 
 
 # Main game loop
@@ -245,20 +291,25 @@ while running:
       for e in enemies:
         e.move()
         e.draw()
+      print(len(enemies))
     else:
       screen.fill('black')
       draw_text('You lose', font_big, 'white', SCREEN_WIDTH/2- 200, 200)
-      draw_text('press space to restart the game', font_big, 'white', SCREEN_WIDTH/2 - 200, 300)
+      draw_text('press w to restart the game', font_big, 'white', SCREEN_WIDTH/2 - 200, 300)
       keys = pygame.key.get_pressed()
-      if keys[pygame.K_SPACE]:
+      if keys[pygame.K_w]:
         game_over = False
         player.rect.x = 100 - offset_x
         player.rect.y = SCREEN_HEIGHT - 100
         offset_x = 0
         
-
-
-
+        tiles.clear()
+        for tile in tiles:
+          tile.kill()
+        enemies.clear()
+        for enemy in enemies:
+          enemy.kill()
+        tileMap(Tile, tiles, Enemy, enemies)
     # Update the display
     pygame.display.flip()
     clock.tick(FPS)

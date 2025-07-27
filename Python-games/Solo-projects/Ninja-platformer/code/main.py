@@ -70,6 +70,17 @@ def tileMap(tileObj,tileList, enemyObj, enemyList):
 
   tile_floor(1, 7800, 400)
 
+  tile_floor(3, 8200, 200)
+
+  tile_floor(2, 8700, 200)
+
+  tile_floor(1, 9500, SCREEN_HEIGHT - 100)
+
+  tile_floor(6, 10000, 600)
+  enemyList.append(enemyObj(15000, 500))
+
+  tile_floor(3, 11000, 400)
+
   #enemyList.clear()
 
 # make font variable
@@ -291,7 +302,7 @@ while running:
       for e in enemies:
         e.move()
         e.draw()
-      print(len(enemies))
+      print(offset_x)
     else:
       screen.fill('black')
       draw_text('You lose', font_big, 'white', SCREEN_WIDTH/2- 200, 200)

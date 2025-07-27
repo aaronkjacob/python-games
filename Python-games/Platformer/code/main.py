@@ -6,6 +6,7 @@ from os import listdir
 from os.path import isfile, join
 
 def tiles():
+    global game_level
     def tile_floor(num, x, y):
         for i in range(num):
             objects.append(Block(x+block_size*i, y, block_size))
@@ -20,18 +21,20 @@ def tiles():
         
     block_size = 96
     objects = []  # Create some additional blocks
+    draw_fire(0, -1000)
 
 
-    tile_floor(5, 0,SCREEN_HEIGHT-block_size)
-    draw_fire(300, 600)
+    if game_level == 1:
+        tile_floor(5, 0,SCREEN_HEIGHT-block_size)
+        draw_fire(300, 600)
 
-    tile_floor(3, 700, SCREEN_HEIGHT - 200)
+        tile_floor(3, 700, SCREEN_HEIGHT - 200)
 
-    tile_floor(2, 1200, 500)
+        tile_floor(2, 1200, 500)
 
-    tile_floor(1, 1700, 350)
+        tile_floor(1, 1700, 350)
 
-    tile_floor(3, 2000, 700)
+        tile_floor(3, 2000, 700)        
 
 
 
@@ -51,6 +54,7 @@ FPS = 60  # Frames per second
 PLAYER_VELOCITY = 5  # Player movement speed
 game_over = False
 menu_screen = True
+game_level = 0
 
 # make font variable
 font_small = pygame.font.SysFont('Lucida Sans', 20)
@@ -109,6 +113,8 @@ class Player(pygame.sprite.Sprite):
         self.jump_count = 0
         self.hit = False  # Flag to check if player is hit
         self.hit_count = 0  # Counter for hit animation
+        self.max_hp = 15
+        self.hp = self.max_hp
     def make_hit(self):
         self.hit = True
         self.hit_count = 0
@@ -158,6 +164,9 @@ class Player(pygame.sprite.Sprite):
         sprite_sheet = 'idle'
         if self.hit:  # If player is hit, use hit animation
             sprite_sheet = 'hit'
+            self.hp -= .02
+        else:
+            self.hp += .01
         if self.y_vel < 0:  # If jumping
             if self.jump_count == 1:
                 sprite_sheet = 'jump'
@@ -178,6 +187,9 @@ class Player(pygame.sprite.Sprite):
     def draw(self, screen, offset_x):
         screen.blit(self.sprite, (self.rect.x-offset_x, self.rect.y))  # Draw the player
         self.mask = pygame.mask.from_surface(self.sprite)  # Create a mask from the sprite for collision detection
+        pygame.draw.rect(screen, 'red', (self.rect.x - offset_x, self.rect.y - 10, self.rect.width, 10))
+        ratio = self.hp / self.max_hp
+        pygame.draw.rect(screen, 'green', (self.rect.x - offset_x, self.rect.y - 10, self.rect.width * ratio, 10))
 
 class Object(pygame.sprite.Sprite):
     def __init__(self, x,y,width,height,name=None):
@@ -291,29 +303,37 @@ def handle_move(player, objects):
     for obj in to_check:
         if obj and obj.name == "fire":
             player.make_hit()  # If player collides with fire, set hit flag
+            player.hp -= .7
+
+def check_if_dead(player):
+    global game_over
+    if player.hp <= 0:
+        game_over = True
 
 # Font setup
 font = pygame.font.Font(None, 36)
 
 
 # Button function
-def draw_button(screen, color, x, y, width, height, text=''):
+def draw_button(screen, color, x, y, width, height, text, level):
     global menu_screen
+    global game_level
     button_rect = pygame.draw.rect(screen, color, (x, y, width, height))
-    if text:
-        text_surface = font.render(text, True, 'black')
-        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
-        screen.blit(text_surface, text_rect)
+    text_surface = font.render(text, True, 'black')
+    text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+    screen.blit(text_surface, text_rect)
     if event.type == pygame.MOUSEBUTTONDOWN:
         pos = pygame.mouse.get_pos()
         if button_rect.collidepoint(pos[0], pos[1]):
             menu_screen = False
+            game_level = level
             
 
 def menu():
     screen.fill('black')
     for i in range(1,5):
-        draw_button(screen, 'red', 220*i - 150, 20, 200,100, 'level '+str(i))
+        draw_button(screen, 'red', 220*i - 150, 20, 200,100, 'level '+str(i), i)
+    tiles()
 
 def main(screen):
     global game_over
@@ -324,7 +344,6 @@ def main(screen):
 
 
     player = Player(100, 100, 50, 50)  # Create a player instance
-    tiles()
 
     offset_x = 0
     scroll_area_width = 400  # Width of the scroll area
@@ -357,6 +376,7 @@ def main(screen):
                 offset_x += player.x_vel
             if player.rect.top > SCREEN_HEIGHT:
                 game_over = True
+            check_if_dead(player)
         elif game_over == False and menu_screen == True:
             menu()
         elif game_over == True and menu_screen == False:

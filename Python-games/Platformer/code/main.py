@@ -295,20 +295,29 @@ def handle_move(player, objects):
 # Font setup
 font = pygame.font.Font(None, 36)
 
+
 # Button function
 def draw_button(screen, color, x, y, width, height, text=''):
+    global menu_screen
     button_rect = pygame.draw.rect(screen, color, (x, y, width, height))
     if text:
         text_surface = font.render(text, True, 'black')
         text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
         screen.blit(text_surface, text_rect)
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        pos = pygame.mouse.get_pos()
+        if button_rect.collidepoint(pos[0], pos[1]):
+            menu_screen = False
+            
 
 def menu():
+    screen.fill('black')
     for i in range(1,5):
         draw_button(screen, 'red', 220*i - 150, 20, 200,100, 'level '+str(i))
 
 def main(screen):
     global game_over
+    global menu_screen
     clock = pygame.time.Clock() # Initialize the clock
 
     background, bg_image = get_background("Yellow.png")  # Load the background image
@@ -322,6 +331,7 @@ def main(screen):
 
     running = True # Main game loop
     while running:
+        global event
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -349,10 +359,11 @@ def main(screen):
                 game_over = True
         elif game_over == False and menu_screen == True:
             menu()
-        else:
+        elif game_over == True and menu_screen == False:
             screen.fill('black')
             draw_text('game over', font_big, 'white', 450, 200)
             draw_text('press w to play again', font_big, 'white', 400, 300)
+            draw_text('press s to go to menu screen', font_big, 'white', 300, 400)
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w]:
                 game_over = False
@@ -364,6 +375,19 @@ def main(screen):
 
                 offset_x = 0
                 scroll_area_width = 400  # Width of the scroll area
+            if keys[pygame.K_s]:
+                menu_screen = True
+                game_over = False
+                game_over = False
+                background, bg_image = get_background("Yellow.png")  # Load the background image
+
+
+                player = Player(100, 100, 50, 50)  # Create a player instance
+                tiles()
+
+                offset_x = 0
+                scroll_area_width = 400  # Width of the scroll area
+
 
 
 

@@ -29,12 +29,22 @@ def tiles():
         draw_fire(300, 600)
 
         tile_floor(3, 700, SCREEN_HEIGHT - 200)
+        draw_fire(780, 500)
 
         tile_floor(2, 1200, 500)
 
         tile_floor(1, 1700, 350)
 
-        tile_floor(3, 2000, 700)        
+        tile_floor(3, 2000, 700)
+        draw_fire(2120, 600)
+
+        tile_floor(1, 2600, 570)
+
+        tile_floor(1, 3000, 500)
+    else:
+        tile_floor(10,0,SCREEN_HEIGHT-block_size)
+
+        
 
 
 
@@ -165,8 +175,8 @@ class Player(pygame.sprite.Sprite):
         if self.hit:  # If player is hit, use hit animation
             sprite_sheet = 'hit'
             self.hp -= .02
-        else:
-            self.hp += .01
+        elif self.hp < self.max_hp:
+            self.hp += .003
         if self.y_vel < 0:  # If jumping
             if self.jump_count == 1:
                 sprite_sheet = 'jump'
@@ -187,6 +197,8 @@ class Player(pygame.sprite.Sprite):
     def draw(self, screen, offset_x):
         screen.blit(self.sprite, (self.rect.x-offset_x, self.rect.y))  # Draw the player
         self.mask = pygame.mask.from_surface(self.sprite)  # Create a mask from the sprite for collision detection
+
+        # player health
         pygame.draw.rect(screen, 'red', (self.rect.x - offset_x, self.rect.y - 10, self.rect.width, 10))
         ratio = self.hp / self.max_hp
         pygame.draw.rect(screen, 'green', (self.rect.x - offset_x, self.rect.y - 10, self.rect.width * ratio, 10))
@@ -214,7 +226,7 @@ class Fire(Object):
     def __init__(self, x, y, width, height):
         super().__init__(x, y + 40, width, height, "fire")
         self.fire = load_spritesheet("Traps", "Fire", width, height)
-        self.image = self.fire["off"][0]
+        self.image = self.fire["on"][0]
         self.mask = pygame.mask.from_surface(self.image)
         self.animation_count = 0
         self.animation_name = "off"
@@ -303,7 +315,7 @@ def handle_move(player, objects):
     for obj in to_check:
         if obj and obj.name == "fire":
             player.make_hit()  # If player collides with fire, set hit flag
-            player.hp -= .7
+            player.hp -= .5
 
 def check_if_dead(player):
     global game_over

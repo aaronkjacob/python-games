@@ -50,6 +50,7 @@ FPS = 60  # Frames per second
 # game variables
 PLAYER_VELOCITY = 5  # Player movement speed
 game_over = False
+menu_screen = True
 
 # make font variable
 font_small = pygame.font.SysFont('Lucida Sans', 20)
@@ -291,6 +292,20 @@ def handle_move(player, objects):
         if obj and obj.name == "fire":
             player.make_hit()  # If player collides with fire, set hit flag
 
+# Font setup
+font = pygame.font.Font(None, 36)
+
+# Button function
+def draw_button(screen, color, x, y, width, height, text=''):
+    button_rect = pygame.draw.rect(screen, color, (x, y, width, height))
+    if text:
+        text_surface = font.render(text, True, 'black')
+        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+        screen.blit(text_surface, text_rect)
+
+def menu():
+    for i in range(1,5):
+        draw_button(screen, 'red', 220*i - 150, 20, 200,100, 'level '+str(i))
 
 def main(screen):
     global game_over
@@ -313,12 +328,14 @@ def main(screen):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-
                 if event.key == pygame.K_SPACE:  # Check if space key is pressed
                     if player.jump_count < 2:
                         player.jump()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print('hi')
 
-        if game_over == False:
+
+        if game_over == False and menu_screen == False:
             player.loop(FPS)  # Update player position
             fire.loop()  # Update fire animation
             handle_move(player, objects) # Handle player movement
@@ -330,6 +347,8 @@ def main(screen):
                 offset_x += player.x_vel
             if player.rect.top > SCREEN_HEIGHT:
                 game_over = True
+        elif game_over == False and menu_screen == True:
+            menu()
         else:
             screen.fill('black')
             draw_text('game over', font_big, 'white', 450, 200)

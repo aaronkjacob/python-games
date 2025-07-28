@@ -7,6 +7,7 @@ from os.path import isfile, join
 
 def tiles():
     global game_level
+    global endpoint
     def tile_floor(num, x, y):
         for i in range(num):
             objects.append(Block(x+block_size*i, y, block_size))
@@ -15,7 +16,6 @@ def tiles():
         global fire
 
         fire = Fire(x, y, 16, 32)
-        fire.on()
         objects.append(fire)
 
         
@@ -60,6 +60,9 @@ def tiles():
         tile_floor(5, 6000, 230)
         endpoint = LevelEnd(6300, 100, block_size)
         objects.append(endpoint)
+
+        fire.on()
+
     else:
         tile_floor(10,0,SCREEN_HEIGHT-block_size)
 
@@ -168,6 +171,7 @@ class Player(pygame.sprite.Sprite):
             self.direction = 'right'
             self.animation_count = 0
     def loop(self,fps):
+        global menu_screen
 
         self.y_vel += min(1, (self.fall_count / fps))  * self.GRAVITY  # Apply gravity
         self.move(self.x_vel, self.y_vel)
@@ -323,7 +327,6 @@ def collide(player, objects, dx):
     return collided_objects  # Return the first collided object
 
 
-
 def handle_move(player, objects):
     keys = pygame.key.get_pressed()
     player.x_vel = 0  # Reset horizontal velocity
@@ -376,6 +379,7 @@ def menu():
 def main(screen):
     global game_over
     global menu_screen
+    global endpoint
     clock = pygame.time.Clock() # Initialize the clock
 
     background, bg_image = get_background("Yellow.png")  # Load the background image
@@ -413,6 +417,9 @@ def main(screen):
             if player.rect.top > SCREEN_HEIGHT:
                 game_over = True
             check_if_dead(player)
+            if player.rect.colliderect(endpoint.rect):
+                menu_screen = True
+                print('hi')
         elif game_over == False and menu_screen == True:
             menu()
         elif game_over == True and menu_screen == False:

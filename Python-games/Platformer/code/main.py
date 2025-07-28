@@ -41,6 +41,25 @@ def tiles():
         tile_floor(1, 2600, 570)
 
         tile_floor(1, 3000, 500)
+
+        tile_floor(3, 3450, 400)
+        draw_fire(3550, 300)
+
+        objects.append(Block(4000, 300, block_size/2))
+
+        objects.append(Block(4300, 300, block_size/5))
+
+        objects.append(Block(4600, 200, block_size/5))
+
+        objects.append(Block(5000, 300, block_size/5))
+
+        tile_floor(3, 5400,400)
+        draw_fire(5500, 300)
+        draw_fire(5550, 300)
+
+        tile_floor(5, 6000, 230)
+        endpoint = LevelEnd(6300, 100, block_size)
+        objects.append(endpoint)
     else:
         tile_floor(10,0,SCREEN_HEIGHT-block_size)
 
@@ -250,6 +269,13 @@ class Fire(Object):
         if self.animation_count // self.ANIMATION_DELAY > len(sprites):
             self.animation_count = 0
 
+class LevelEnd(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        block = pygame.image.load('assets/Items/Checkpoints/End/End (Idle).png')
+        self.image.blit(block, (0,0)) # Load the block image and draw it on the object surface
+        self.mask = pygame.mask.from_surface(self.image)  # Create a mask from the block image for collision detection
+
 def get_background(name):
     # Load background image
     image = pygame.image.load(join("assets", "Background", name))
@@ -355,7 +381,7 @@ def main(screen):
     background, bg_image = get_background("Yellow.png")  # Load the background image
 
 
-    player = Player(100, 100, 50, 50)  # Create a player instance
+    player = Player(100, 600, 50, 50)  # Create a player instance
 
     offset_x = 0
     scroll_area_width = 400  # Width of the scroll area
@@ -372,8 +398,6 @@ def main(screen):
                 if event.key == pygame.K_SPACE:  # Check if space key is pressed
                     if player.jump_count < 2:
                         player.jump()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                print('hi')
 
 
         if game_over == False and menu_screen == False:
@@ -402,7 +426,7 @@ def main(screen):
                 background, bg_image = get_background("Yellow.png")  # Load the background image
 
 
-                player = Player(100, 100, 50, 50)  # Create a player instance
+                player = Player(100, 600, 50, 50)  # Create a player instance
                 tiles()
 
                 offset_x = 0
@@ -414,7 +438,7 @@ def main(screen):
                 background, bg_image = get_background("Yellow.png")  # Load the background image
 
 
-                player = Player(100, 100, 50, 50)  # Create a player instance
+                player = Player(100, 600, 50, 50)  # Create a player instance
                 tiles()
 
                 offset_x = 0
